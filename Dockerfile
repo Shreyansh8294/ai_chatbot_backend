@@ -1,25 +1,26 @@
-# Use official Java 17 runtime
+# Use Java 17
 FROM eclipse-temurin:17-jdk
 
 # Set working directory
 WORKDIR /app
 
-# Copy Maven wrapper & pom.xml
-COPY mvnw .
-COPY .mvn .mvn
+# Copy pom.xml first (to leverage Docker cache)
 COPY pom.xml .
 
-# Download dependencies (better caching)
-RUN ./mvnw dependency:go-offline
+# Install Maven
+RUN apt-get update && apt-get install -y maven
+
+# Download dependencies (cache layer)
+RUN mvn dependency:go-offline
 
 # Copy source code
-COPY src src
+COPY src ./src
 
 # Build the application
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
-# Expose Spring Boot default port
+# Expose the default Spring Boot port
 EXPOSE 8080
 
-# Run the application
+# Run the jar
 CMD ["java", "-jar", "target/*.jar"]
