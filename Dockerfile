@@ -1,27 +1,16 @@
-# Use Java 17
 FROM eclipse-temurin:17-jdk
 
-# Set working directory
 WORKDIR /app
 
-# Copy pom.xml first (to leverage Docker cache)
-COPY pom.xml .
-
-# Install Maven
 RUN apt-get update && apt-get install -y maven
 
-# Download dependencies (cache layer)
-RUN mvn dependency:go-offline
+COPY pom.xml .
+RUN mvn -B dependency:resolve dependency:resolve-plugins
 
-# Copy source code
 COPY src ./src
 
-# Build the application
-RUN mvn clean package -DskipTests
+RUN mvn -B -DskipTests package
 
-# Expose the default Spring Boot port
 EXPOSE 8080
 
-# Run the jar
-CMD ls -R && java -jar target/*.jar
-
+CMD ["java", "-jar", "target/aichat-proxy-0.0.1-SNAPSHOT.jar"]
