@@ -23,7 +23,7 @@ public class ChatController {
 
     @PostMapping("/chat")
     public ResponseEntity<?> chat(@RequestBody ChatRequest request) {
-
+    	System.out.println("Request received: " + request.getMessage());
         if (geminiKey == null || geminiKey.isEmpty()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Gemini API key not available"));
